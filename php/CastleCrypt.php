@@ -72,7 +72,7 @@ class CastleCrypt {
 	 * Set privateKey (used for decryption)
 	 *
 	 * If you want to use a private key from PEM-file you have to call file_get_contents first, e.g.
-	 * $casteCrypt->setPrivateKey(file_get_contents('path/to/private_key.pem'));
+	 * $castleCrypt->setPrivateKey(file_get_contents('path/to/private_key.pem'));
 	 *
 	 * @param $key private key in PEM format
 	 * @return bool true on success
