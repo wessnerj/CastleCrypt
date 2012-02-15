@@ -107,11 +107,9 @@ class CastleCrypt {
 		$prefix = 0;
 
 		if (strlen($data) < $this->__keySize - 11) {
-			echo "Using RSA only ... \n";
 			// We can use RSA without AES
 			$encryptedData = $this->__doRSAEncryption($data);
 		} else {
-			echo "Using hybrid mode ... \n";
 			// $data is too big, use hybrid method with AES
 			// Set hybrid mode bit
 			$prefix |= self::$__methodMask;
