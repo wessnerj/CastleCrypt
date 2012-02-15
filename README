@@ -1,0 +1,3 @@
+CastleCrypt allows you to en-/decrpyt your data with PHP and/or JAVA.
+
+CastleCrypt uses AES and RSA for public-key cryptography.
