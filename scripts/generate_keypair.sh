@@ -3,7 +3,7 @@
 # This file is part of CastleCrypt
 ################################################################################
 #
-# (C) Copyright 2012, Joseph Wessner
+# (C) Copyright 2012, Joseph Wessner <castleCrypt@hdr.meetr.de>
 #
 # CastleCrypt is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -29,7 +29,8 @@
 
 # Path to openssl binary
 OPENSSL="openssl"
-# KeySize (default: 2048)
+# KeySize (default: 2048) 
+# ! do not change this value as CastleCrypt only supports 2048 Bit keys now !
 KEYSIZE=2048
 
 if [ -z "$1" ]; then
