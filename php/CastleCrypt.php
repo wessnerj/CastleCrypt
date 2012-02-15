@@ -39,6 +39,15 @@ class CastleCrypt {
 	 * @var int keySize in Byte (256 Byte = 2048 Bit), CastleCrypt supports only 2048 Bit keySize atm
 	 */
 	private $__keySize = 256;
+	/**
+	 * @var int keySize in Byte for AES keys (24 Byte = 192 Bit), CastleCrypt supports only 192 Bit AES keys atm
+	 */
+	private $__keySizeAES = 24;
+
+	/**
+	 * @var string has to be the same value for all participants
+	 */
+	private $__defaultIV = 'ThoheeWehtai3EPhoUea4Aix';
 
 	/**
 	 * If this bit is set, hybrid encrption is used.
@@ -49,6 +58,15 @@ class CastleCrypt {
 	 * @var int BitMask for checking the second bit of a byte (1 << 6)
 	 */
 	// private static $__signMask = 0x40;
+
+	/**
+	 * @var int the key length field of the output is left-shifted by this constant (or right-shifted for input)
+	 */
+	private static $__keyLengthMultiplier = 5;
+	/**
+	 * @var int constant for better code reading; don't change
+	 */
+	private static $__keyLengthFieldSize = 1;
 
 	/**
 	 * Set privateKey (used for decryption)
@@ -86,17 +104,34 @@ class CastleCrypt {
 	 */
 	public function encrypt($data) {
 		$encryptedData = '';
-		$prefix = chr(0);
+		$prefix = 0;
 
 		if (strlen($data) < $this->__keySize - 11) {
+			echo "Using RSA only ... \n";
 			// We can use RSA without AES
 			$encryptedData = $this->__doRSAEncryption($data);
 		} else {
+			echo "Using hybrid mode ... \n";
 			// $data is too big, use hybrid method with AES
-			// TODO
+			// Set hybrid mode bit
+			$prefix |= self::$__methodMask;
+
+			// generate AES key
+			$aesKey = $this->__getRandomKey();
+
+			// encrypt AES key with RSA
+			$encryptedKey = $this->__doRSAEncryption($aesKey);
+
+			// encrypt data with AES
+			$aesCrypted = $this->__doAESEncryption($aesKey, $data);
+
+			// calculate key length
+			$keyLength = strlen($encryptedKey) >> self::$__keyLengthMultiplier;
+
+			$encryptedData = chr($keyLength) . $encryptedKey . $aesCrypted;
 		}
 
-		return $prefix . $encryptedData;
+		return chr($prefix) . $encryptedData;
 	}
 
 	/**
@@ -112,7 +147,16 @@ class CastleCrypt {
 
 		if ($prefix & self::$__methodMask) {
 			// hybrid mode was used for encryption
-			// TODO
+			// get AES key length
+			$keyLengthInBytes = ord(substr($cryptedData, 0, self::$__keyLengthFieldSize)) << self::$__keyLengthMultiplier;
+
+			// get AES key
+			$encryptedKey = substr($cryptedData, self::$__keyLengthFieldSize, $keyLengthInBytes);
+			$key = $this->__doRSADecryption($encryptedKey);
+
+			// decrypt data
+			$aesData = substr($cryptedData, self::$__keyLengthFieldSize + $keyLengthInBytes);
+			$decryptedData = $this->__doAESDecryption($key, $aesData);
 		} else {
 			// only RSA encryption was used
 			$decryptedData = $this->__doRSADecryption($cryptedData);
@@ -151,5 +195,106 @@ class CastleCrypt {
 
 		throw new Exception('Private decrypt error');
 		return false;
+	}
+
+	/**
+	 * Get a random string (byteArray) of $size.
+	 *
+	 * @param null $size size of key in bytes (null: use default AES keyLength)
+	 * @return string key of $size Bytes
+	 */
+	private function __getRandomKey($size = null) {
+		if (is_null($size))
+			$size = $this->__keySizeAES;
+
+		$key = '';
+
+		// Use /dev/urandom if possible
+		if (@is_readable('/dev/urandom')) {
+			$f=fopen('/dev/urandom', 'rb');
+			$key = fread($f, $size);
+			fclose($f);
+		}
+
+		while (strlen($key) < $size) {
+			$key .= chr(mt_rand(0, 0xFF));
+		}
+
+		return $key;
+	}
+
+	/**
+	 * Encrypt $data with $key. (Uses AES only)
+	 *
+	 * This method uses AES-192 with CBC
+	 *
+	 * @param $key
+	 * @param $data
+	 * @return string
+	 */
+	private function __doAESEncryption($key, $data) {
+		// add padding
+		$data = $this->__pkcs5Pad($data, mcrypt_get_block_size(MCRYPT_RIJNDAEL_192, MCRYPT_MODE_CBC));
+
+		// load cipher
+		$cipher = mcrypt_module_open(MCRYPT_RIJNDAEL_192, '', MCRYPT_MODE_CBC, '');
+		mcrypt_generic_init($cipher, $key, $this->__defaultIV);
+
+		// encrypt
+		$data = mcrypt_generic($cipher, $data);
+
+		// clean up
+		mcrypt_generic_deinit($cipher);
+
+		return $data;
+	}
+
+	/**
+	 * Decrypt $data with $key. (Uses AES only)
+	 *
+	 * This method uses AES-192 with CBC
+	 *
+	 * @param $key
+	 * @param $data
+	 * @return string
+	 */
+	private function __doAESDecryption($key, $data) {
+		// load cipher
+		$cipher = mcrypt_module_open(MCRYPT_RIJNDAEL_192, '', MCRYPT_MODE_CBC, '');
+		mcrypt_generic_init($cipher, $key, $this->__defaultIV);
+
+		// decrypt
+		$data = mdecrypt_generic($cipher, $data);
+
+		// clean up
+		mcrypt_generic_deinit($cipher);
+
+		return $this->__pkcs5Unpad($data);
+	}
+
+	/**
+	 * Adds pkcs5 padding
+	 * @return Given text with pkcs5 padding
+	 * @param string $data String to pad
+	 * @param integer $blocksize Blocksize used by encryption
+	 */
+	private function __pkcs5Pad($data, $blocksize){
+		$pad = $blocksize - (strlen($data) % $blocksize);
+		$returnValue = $data . str_repeat(chr($pad), $pad);
+
+		return $returnValue;
+	}
+
+	/**
+	 * Removes padding
+	 * @return Given text with removed padding characters
+	 * @param string $data String to unpad
+	 */
+	private function __pkcs5Unpad($data) {
+		$pad = ord($data{strlen($data)-1});
+		if ($pad > strlen($data)) return false;
+		if (strspn($data, chr($pad), strlen($data) - $pad) != $pad) return false;
+
+		return substr($data, 0, -1 * $pad);
 	}
 }
