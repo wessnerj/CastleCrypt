@@ -80,6 +80,7 @@ class CastleCrypt {
 	 * It is recommended to provide your own $initializationVector.
 	 * 
 	 * @param $initializationVector if it is null CastleCrypt's default initializationVector for AES is used.
+	 * 		initializationVector has to be 16 Byte
 	 */
 	public function __construct($initializationVector = null) {
 		if (is_null($initializationVector))

@@ -110,7 +110,7 @@ public class CastleCrypt {
 	/**
 	 * Default constructor
 	 * 
-	 * @param initializationVector
+	 * @param initializationVector initializationVector has to be 16 Byte
 	 */
 	public CastleCrypt(byte[] initializationVector) {
 		this.defaultIV = new IvParameterSpec(initializationVector);
