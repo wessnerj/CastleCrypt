@@ -42,7 +42,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * 
+ * @author Thomas Rebele <rebele@in.tum.de>
  * @author Joseph Wessner <castleCrypt@hdr.meetr.de>
  */
 public class CastleCrypt {
