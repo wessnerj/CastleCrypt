@@ -50,7 +50,7 @@ class CastleCrypt {
 	/**
 	 * @var string Default IV, which is used if no other IV is given in constructor
 	 */
-	private static $__defaultIVBytes = base64_decode('1lY9/IJ4WLKl2lrH3bDwtQ==');
+	private static $__defaultIVBase64 = '1lY9/IJ4WLKl2lrH3bDwtQ==';
 	/**
 	 * @var string IV used for AES de-/encryption
 	 */
@@ -83,7 +83,7 @@ class CastleCrypt {
 	 */
 	public function __construct($initializationVector = null) {
 		if (is_null($initializationVector))
-			$this->__defaultIV = self::$__defaultIVBytes
+			$this->__defaultIV = base64_decode(self::$__defaultIVBase64);
 	}
 	
 	/**
