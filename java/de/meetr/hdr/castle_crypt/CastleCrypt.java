@@ -60,14 +60,14 @@ public class CastleCrypt {
 	 */
 	private final int keySize = 256;
 	/**
-	 * keySize in Byte for AES keys (24 Byte = 192 Bit), CastleCrypt supports only 192 Bit AES keys atm
+	 * keySize in Byte for AES keys (16 Byte = 128 Bit), CastleCrypt supports only 128 Bit AES keys atm
 	 */
-	private final int keySizeAES = 24;
+	private final int keySizeAES = 16;
 	
 	/**
 	 * has to be the same value for all participants
 	 */
-	private final IvParameterSpec defaultIV = new IvParameterSpec("ThoheeWehtai3EPhoUea4Aix".getBytes());
+	private final IvParameterSpec defaultIV = new IvParameterSpec("ThheetiEhUea4Aix".getBytes());
 	
 	/**
 	 * If this bit is set, hybrid encrption is used.
@@ -234,7 +234,7 @@ public class CastleCrypt {
 			byte[] key = this.doRSADecryption(encryptedKey);
 			
 			// decrypt data
-			byte[] aesData = new byte[cryptedData.length - keyLengthInBytes];
+			byte[] aesData = new byte[cryptedData.length - keyLengthInBytes - CastleCrypt.keyLengthFieldSize];
 			System.arraycopy(cryptedData, (CastleCrypt.keyLengthFieldSize + keyLengthInBytes), aesData, 0, aesData.length);
 			decryptedData = this.doAESDecryption(key, aesData);
 		} else {

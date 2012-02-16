@@ -40,14 +40,14 @@ class CastleCrypt {
 	 */
 	private $__keySize = 256;
 	/**
-	 * @var int keySize in Byte for AES keys (24 Byte = 192 Bit), CastleCrypt supports only 192 Bit AES keys atm
+	 * @var int keySize in Byte for AES keys (16 Byte = 128 Bit), CastleCrypt supports only 128 Bit AES keys atm
 	 */
-	private $__keySizeAES = 24;
+	private $__keySizeAES = 16;
 
 	/**
 	 * @var string has to be the same value for all participants
 	 */
-	private $__defaultIV = 'ThoheeWehtai3EPhoUea4Aix';
+	private $__defaultIV = 'ThheetiEhUea4Aix';
 
 	/**
 	 * If this bit is set, hybrid encrption is used.
