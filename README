@@ -1,3 +1,11 @@
 CastleCrypt allows you to en-/decrpyt your data with PHP and/or JAVA.
 
 CastleCrypt uses AES and RSA for public-key cryptography.
+
+HowTo:
+	1. Gernate Public-/PrivateKey with the the generate_keypair.sh 
+	   script in scripts/
+	   
+	   .der files are for JAVA and .pem files are for PHP
+	
+	2. Look at the examples in examples/
