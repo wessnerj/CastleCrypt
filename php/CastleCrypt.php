@@ -23,6 +23,9 @@
  */
 
 /**
+ * CastleCrypt provides an easy to use interface for public-/private-Key de-/encryption.
+ * CastleCrypt is available for JAVA and PHP.
+ * 
  * @author Joseph Wessner <castleCrypt@hdr.meetr.de>
  */
 class CastleCrypt {
@@ -45,9 +48,13 @@ class CastleCrypt {
 	private $__keySizeAES = 16;
 
 	/**
-	 * @var string has to be the same value for all participants
+	 * @var string Default IV, which is used if no other IV is given in constructor
 	 */
-	private $__defaultIV = 'ThheetiEhUea4Aix';
+	private static $__defaultIVBytes = base64_decode('1lY9/IJ4WLKl2lrH3bDwtQ==');
+	/**
+	 * @var string IV used for AES de-/encryption
+	 */
+	private $__defaultIV;
 
 	/**
 	 * If this bit is set, hybrid encrption is used.
@@ -68,6 +75,17 @@ class CastleCrypt {
 	 */
 	private static $__keyLengthFieldSize = 1;
 
+	/**
+	 * Default constructor
+	 * It is recommended to provide your own $initializationVector.
+	 * 
+	 * @param $initializationVector if it is null CastleCrypt's default initializationVector for AES is used.
+	 */
+	public function __construct($initializationVector = null) {
+		if (is_null($initializationVector))
+			$this->__defaultIV = self::$__defaultIVBytes
+	}
+	
 	/**
 	 * Set privateKey (used for decryption)
 	 *
@@ -224,7 +242,7 @@ class CastleCrypt {
 	/**
 	 * Encrypt $data with $key. (Uses AES only)
 	 *
-	 * This method uses AES-192 with CBC
+	 * This method uses AES-182 with CBC
 	 *
 	 * @param $key
 	 * @param $data
@@ -232,10 +250,10 @@ class CastleCrypt {
 	 */
 	private function __doAESEncryption($key, $data) {
 		// add padding
-		$data = $this->__pkcs5Pad($data, mcrypt_get_block_size(MCRYPT_RIJNDAEL_192, MCRYPT_MODE_CBC));
+		$data = $this->__pkcs5Pad($data, mcrypt_get_block_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC));
 
 		// load cipher
-		$cipher = mcrypt_module_open(MCRYPT_RIJNDAEL_192, '', MCRYPT_MODE_CBC, '');
+		$cipher = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_CBC, '');
 		mcrypt_generic_init($cipher, $key, $this->__defaultIV);
 
 		// encrypt
@@ -250,7 +268,7 @@ class CastleCrypt {
 	/**
 	 * Decrypt $data with $key. (Uses AES only)
 	 *
-	 * This method uses AES-192 with CBC
+	 * This method uses AES-182 with CBC
 	 *
 	 * @param $key
 	 * @param $data
@@ -258,7 +276,7 @@ class CastleCrypt {
 	 */
 	private function __doAESDecryption($key, $data) {
 		// load cipher
-		$cipher = mcrypt_module_open(MCRYPT_RIJNDAEL_192, '', MCRYPT_MODE_CBC, '');
+		$cipher = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_CBC, '');
 		mcrypt_generic_init($cipher, $key, $this->__defaultIV);
 
 		// decrypt

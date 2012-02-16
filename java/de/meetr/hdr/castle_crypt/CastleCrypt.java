@@ -4,6 +4,7 @@ package de.meetr.hdr.castle_crypt;
  * This file is part of CastleCrypt
  *******************************************************************************
  *
+ * (C) Copyright 2012, Thomas Rebele <rebele@in.tum.de>
  * (C) Copyright 2012, Joseph Wessner <castleCrypt@hdr.meetr.de>
  *
  * CastleCrypt is free software; you can redistribute it and/or modify
@@ -42,6 +43,9 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
+ * CastleCrypt provides an easy to use interface for public-/private-Key de-/encryption.
+ * CastleCrypt is available for JAVA and PHP.
+ * 
  * @author Thomas Rebele <rebele@in.tum.de>
  * @author Joseph Wessner <castleCrypt@hdr.meetr.de>
  */
@@ -65,9 +69,18 @@ public class CastleCrypt {
 	private final int keySizeAES = 16;
 	
 	/**
-	 * has to be the same value for all participants
+	 * Default IV, which is used if no other IV is given in constructor
 	 */
-	private final IvParameterSpec defaultIV = new IvParameterSpec("ThheetiEhUea4Aix".getBytes());
+	private static final byte[] defaultIVBytes = {
+			(byte) 0xd6, (byte) 0x56, (byte) 0x3d, (byte) 0xfc,
+			(byte) 0x82, (byte) 0x78, (byte) 0x58, (byte) 0xb2,
+			(byte) 0xa5, (byte) 0xda, (byte) 0x5a, (byte) 0xc7,
+			(byte) 0xdd, (byte) 0xb0, (byte) 0xf0, (byte) 0xb5
+	};	
+	/**
+	 * IV used for AES de-/encryption
+	 */
+	private final IvParameterSpec defaultIV;
 	
 	/**
 	 * If this bit is set, hybrid encrption is used.
@@ -83,6 +96,25 @@ public class CastleCrypt {
 	 * constant for better code reading; don't change
 	 */
 	private static final int keyLengthFieldSize = 1;
+	
+	/**
+	 * Constructor which uses CastleCrypt's default initializationVector for AES.
+	 * It is recommended to provide your own initializationVector.
+	 * 
+	 * @deprecated
+	 */
+	public CastleCrypt() {
+		this.defaultIV = new IvParameterSpec(CastleCrypt.defaultIVBytes);
+	}
+	
+	/**
+	 * Default constructor
+	 * 
+	 * @param initializationVector
+	 */
+	public CastleCrypt(byte[] initializationVector) {
+		this.defaultIV = new IvParameterSpec(initializationVector);
+	}
 	
 	/**
 	 * Set privateKey (used for decryption)
